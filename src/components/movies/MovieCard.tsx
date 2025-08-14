@@ -1,9 +1,9 @@
 "use client"
 
 import type React from "react"
-
+import { useState } from "react"
 import { cn } from "@/lib/utils"
-import { TMDB_CONFIG } from "@/config/tmdb"
+import { getImageUrl } from "@/config/tmdb"
 import { Star } from "lucide-react"
 
 // Movie data structure from TMDB API
@@ -28,21 +28,11 @@ interface MovieCardProps {
  * @param size - Image size (w342, w500, w780, etc.)
  * @returns Complete image URL
  */
-const IMG = (path: string, size = "w342") => `${TMDB_CONFIG.IMAGE_BASE_URL.replace("w500", size)}${path}`
+const IMG = (path: string | null, size = "w342") => getImageUrl(path, size)
 
-/**
- * MovieCard component displays movie information in a card format
- *
- * Features:
- * - Responsive aspect ratio poster display
- * - Hover effects with scale animation and gradient overlay
- * - Star rating display
- * - Flexible action slot for buttons
- * - Accessibility features (ARIA labels, semantic HTML)
- * - Fallback for missing poster images
- */
 const MovieCard = ({ movie, onClick, actions }: MovieCardProps) => {
-  const hasPoster = !!movie.poster_path
+  const [imageError, setImageError] = useState(false)
+  const hasPoster = !!movie.poster_path && !imageError
 
   return (
     <article
@@ -62,10 +52,12 @@ const MovieCard = ({ movie, onClick, actions }: MovieCardProps) => {
           <>
             {/* Movie poster image with hover scale effect */}
             <img
-              src={IMG(movie.poster_path!) || "/placeholder.svg"}
+              src={IMG(movie.poster_path) || "/placeholder.svg"}
               alt={`${movie.title} poster`}
               loading="lazy" // Optimize loading performance
               className="h-full w-full object-cover transition-transform duration-500 will-change-transform group-hover:scale-110"
+              onError={() => setImageError(true)}
+              crossOrigin="anonymous"
             />
             {/* Gradient overlay that appears on hover */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -73,7 +65,10 @@ const MovieCard = ({ movie, onClick, actions }: MovieCardProps) => {
         ) : (
           // Fallback for movies without poster images
           <div className="h-full w-full grid place-items-center text-muted-foreground text-sm bg-gradient-to-br from-muted to-muted/50">
-            No image
+            <div className="text-center p-4">
+              <div className="text-2xl mb-2">🎬</div>
+              <div>No Image Available</div>
+            </div>
           </div>
         )}
       </div>
