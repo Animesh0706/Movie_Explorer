@@ -23,7 +23,7 @@ const DEMO_MOVIES: Movie[] = [
   {
     id: 1,
     title: "War of the Worlds",
-    poster_path: null,
+    poster_path: "/placeholder.svg?height=450&width=300&text=War+of+the+Worlds",
     vote_average: 4.2,
     overview: "Demo movie for offline viewing",
     release_date: "2024-01-01",
@@ -31,7 +31,7 @@ const DEMO_MOVIES: Movie[] = [
   {
     id: 2,
     title: "Jurassic World Rebirth",
-    poster_path: null,
+    poster_path: "/placeholder.svg?height=450&width=300&text=Jurassic+World",
     vote_average: 6.4,
     overview: "Demo movie for offline viewing",
     release_date: "2024-01-01",
@@ -39,7 +39,7 @@ const DEMO_MOVIES: Movie[] = [
   {
     id: 3,
     title: "William Tell",
-    poster_path: null,
+    poster_path: "/placeholder.svg?height=450&width=300&text=William+Tell",
     vote_average: 6.3,
     overview: "Demo movie for offline viewing",
     release_date: "2024-01-01",
@@ -47,7 +47,7 @@ const DEMO_MOVIES: Movie[] = [
   {
     id: 4,
     title: "The Pickup",
-    poster_path: null,
+    poster_path: "/placeholder.svg?height=450&width=300&text=The+Pickup",
     vote_average: 6.6,
     overview: "Demo movie for offline viewing",
     release_date: "2024-01-01",
@@ -55,7 +55,7 @@ const DEMO_MOVIES: Movie[] = [
   {
     id: 5,
     title: "Legends of the Condor Heroes",
-    poster_path: null,
+    poster_path: "/placeholder.svg?height=450&width=300&text=Legends+of+Condor",
     vote_average: 6.2,
     overview: "Demo movie for offline viewing",
     release_date: "2024-01-01",
@@ -63,7 +63,7 @@ const DEMO_MOVIES: Movie[] = [
   {
     id: 6,
     title: "How to Train Your Dragon",
-    poster_path: null,
+    poster_path: "/placeholder.svg?height=450&width=300&text=How+to+Train+Dragon",
     vote_average: 8.0,
     overview: "Demo movie for offline viewing",
     release_date: "2024-01-01",
