@@ -136,16 +136,6 @@ const Index = () => {
         const res = await fetch(url)
         const data = (await res.json()) as TMDBListResponse
 
-        console.log("API Response:", {
-          url,
-          status: res.status,
-          ok: res.ok,
-          dataKeys: Object.keys(data),
-          resultsCount: data.results?.length || 0,
-          firstMovie: data.results?.[0],
-          totalPages: data.total_pages,
-        })
-
         // Check if request was cancelled during fetch
         if (cancel) return
 
@@ -158,19 +148,12 @@ const Index = () => {
           // For page 1, replace movies; for subsequent pages, append
           setMovies((prev) => (page === 1 ? data.results : [...prev, ...data.results]))
         } else {
-          // Handle API errors (invalid key, rate limits, etc.)
           console.error("API Error:", data)
           if (page === 1) {
             setMovies([])
           }
         }
       } catch (error) {
-        console.error("Fetch error details:", {
-          error,
-          message: error instanceof Error ? error.message : "Unknown error",
-          url,
-        })
-
         const isNetworkError =
           error instanceof Error &&
           (error.message.includes("Failed to fetch") ||
@@ -179,7 +162,7 @@ const Index = () => {
             error.name === "TypeError")
 
         if (isNetworkError && page === 1) {
-          console.warn("Network error detected, showing demo content")
+          console.error("Network connectivity issue detected")
           setNetworkError(true)
           setShowingDemo(true)
           setMovies(DEMO_MOVIES)

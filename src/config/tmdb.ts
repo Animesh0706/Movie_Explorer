@@ -3,7 +3,6 @@ const getAPIKey = (): string => {
   if (typeof window !== "undefined") {
     const storedKey = localStorage.getItem("tmdb_api_key")
     if (storedKey && storedKey.trim()) {
-      console.log("Using localStorage API key")
       return storedKey.trim()
     }
   }
@@ -14,13 +13,10 @@ const getAPIKey = (): string => {
   const fallbackKey = "b260ba0992bc7dc0ace2e38b75fee53a"
 
   if (viteKey) {
-    console.log("Using VITE_TMDB_API_KEY from environment")
     return viteKey
   } else if (nextKey) {
-    console.log("Using NEXT_PUBLIC_TMDB_API_KEY from environment")
     return nextKey
   } else {
-    console.log("Using fallback API key")
     return fallbackKey
   }
 }
