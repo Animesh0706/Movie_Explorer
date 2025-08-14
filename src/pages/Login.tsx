@@ -29,18 +29,14 @@ const Login = () => {
     setError(null)
 
     if (email === "demo@example.com" && password === "password") {
-      // Simulate successful login with demo user
-      const demoUser = {
-        id: "demo-user",
-        email: "demo@example.com",
-        name: "Demo User",
-      }
+      // Use the AuthContext's session management instead of custom localStorage
+      const demoUser = { email: "demo@example.com" }
 
-      // Store demo user in localStorage to maintain session
-      localStorage.setItem("user", JSON.stringify(demoUser))
+      // Set session using AuthContext's session key
+      localStorage.setItem("auth_session", JSON.stringify(demoUser))
 
-      // Navigate to home page
-      navigate("/")
+      // Force page reload to trigger AuthContext useEffect and update user state
+      window.location.href = "/"
       setLoading(false)
       return
     }
