@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useFavorites } from "@/hooks/useFavorites"
 import { useNavigate } from "react-router-dom"
-import { Search } from "lucide-react"
+import { Search, Wifi, WifiOff } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 // TMDB API response structure for movie lists
 interface TMDBListResponse {
@@ -17,6 +18,57 @@ interface TMDBListResponse {
   total_pages: number
   results: Movie[]
 }
+
+const DEMO_MOVIES: Movie[] = [
+  {
+    id: 1,
+    title: "War of the Worlds",
+    poster_path: null,
+    vote_average: 4.2,
+    overview: "Demo movie for offline viewing",
+    release_date: "2024-01-01",
+  },
+  {
+    id: 2,
+    title: "Jurassic World Rebirth",
+    poster_path: null,
+    vote_average: 6.4,
+    overview: "Demo movie for offline viewing",
+    release_date: "2024-01-01",
+  },
+  {
+    id: 3,
+    title: "William Tell",
+    poster_path: null,
+    vote_average: 6.3,
+    overview: "Demo movie for offline viewing",
+    release_date: "2024-01-01",
+  },
+  {
+    id: 4,
+    title: "The Pickup",
+    poster_path: null,
+    vote_average: 6.6,
+    overview: "Demo movie for offline viewing",
+    release_date: "2024-01-01",
+  },
+  {
+    id: 5,
+    title: "Legends of the Condor Heroes",
+    poster_path: null,
+    vote_average: 6.2,
+    overview: "Demo movie for offline viewing",
+    release_date: "2024-01-01",
+  },
+  {
+    id: 6,
+    title: "How to Train Your Dragon",
+    poster_path: null,
+    vote_average: 8.0,
+    overview: "Demo movie for offline viewing",
+    release_date: "2024-01-01",
+  },
+]
 
 /**
  * Index page component - Main movie browsing interface
@@ -28,7 +80,8 @@ interface TMDBListResponse {
  * - Favorite/unfavorite functionality
  * - Loading states with skeleton placeholders
  * - Responsive grid layout
- * - Error handling for API failures
+ * - Error handling for API failures and network issues
+ * - Fallback demo content when API is unreachable
  */
 const Index = () => {
   const navigate = useNavigate()
@@ -40,6 +93,9 @@ const Index = () => {
   const [loading, setLoading] = useState(false)
   const [movies, setMovies] = useState<Movie[]>([])
 
+  const [networkError, setNetworkError] = useState(false)
+  const [showingDemo, setShowingDemo] = useState(false)
+
   // Favorites functionality
   const { toggle, has } = useFavorites()
 
@@ -50,15 +106,19 @@ const Index = () => {
   useEffect(() => {
     setMovies([])
     setPage(1)
+    setNetworkError(false)
+    setShowingDemo(false)
   }, [query])
 
   /**
    * Main effect for fetching movies from TMDB API
    * Handles both search and popular movies endpoints
    * Implements pagination by appending new results to existing ones
+   * Now includes network error detection and fallback content
    */
   useEffect(() => {
     let cancel = false // Cleanup flag for cancelled requests
+    let url = "" // Declare the url variable here
 
     const run = async () => {
       // Validate API key configuration
@@ -71,13 +131,26 @@ const Index = () => {
       try {
         // Choose endpoint based on search query
         const endpoint = query ? "/search/movie" : "/movie/popular"
-        const url = `${TMDB_CONFIG.BASE_URL}${endpoint}?api_key=${TMDB_CONFIG.API_KEY}&language=en-US&page=${page}&query=${encodeURIComponent(query)}`
+        url = `${TMDB_CONFIG.BASE_URL}${endpoint}?api_key=${TMDB_CONFIG.API_KEY}&language=en-US&page=${page}&query=${encodeURIComponent(query)}`
 
         const res = await fetch(url)
         const data = (await res.json()) as TMDBListResponse
 
+        console.log("API Response:", {
+          url,
+          status: res.status,
+          ok: res.ok,
+          dataKeys: Object.keys(data),
+          resultsCount: data.results?.length || 0,
+          firstMovie: data.results?.[0],
+          totalPages: data.total_pages,
+        })
+
         // Check if request was cancelled during fetch
         if (cancel) return
+
+        setNetworkError(false)
+        setShowingDemo(false)
 
         // Validate API response structure
         if (data.results && Array.isArray(data.results)) {
@@ -92,10 +165,25 @@ const Index = () => {
           }
         }
       } catch (error) {
-        console.error("Fetch error:", error)
-        // Clear movies only for first page errors
-        if (page === 1) {
-          setMovies([])
+        console.error("Fetch error details:", {
+          error,
+          message: error instanceof Error ? error.message : "Unknown error",
+          url,
+        })
+
+        const isNetworkError =
+          error instanceof Error &&
+          (error.message.includes("Failed to fetch") ||
+            error.message.includes("NetworkError") ||
+            error.message.includes("ERR_CONNECTION_TIMED_OUT") ||
+            error.name === "TypeError")
+
+        if (isNetworkError && page === 1) {
+          console.warn("Network error detected, showing demo content")
+          setNetworkError(true)
+          setShowingDemo(true)
+          setMovies(DEMO_MOVIES)
+          setTotalPages(1)
         }
       } finally {
         setLoading(false)
@@ -117,7 +205,7 @@ const Index = () => {
   }, [])
 
   // Memoized check for load more button availability
-  const canLoadMore = useMemo(() => page < totalPages, [page, totalPages])
+  const canLoadMore = useMemo(() => page < totalPages && !showingDemo, [page, totalPages, showingDemo])
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -126,6 +214,16 @@ const Index = () => {
       <section className="container mx-auto py-8 px-4">
         {/* Screen reader accessible page title */}
         <h1 className="sr-only">Movie Explorer - Browse and Search Movies</h1>
+
+        {networkError && (
+          <Alert className="max-w-2xl mx-auto mb-6 border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950">
+            <WifiOff className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-orange-800 dark:text-orange-200">
+              <strong>Network Issue Detected:</strong> Unable to connect to movie database. Showing demo content below.
+              This may be due to firewall restrictions or network connectivity issues.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Search input section */}
         <div className="max-w-2xl mx-auto mb-8">
@@ -138,8 +236,14 @@ const Index = () => {
               onChange={(e) => setQuery(e.target.value)}
               aria-label="Search movies"
               className="pl-10 h-12 text-base bg-card/50 backdrop-blur border-border/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+              disabled={showingDemo}
             />
           </div>
+          {showingDemo && (
+            <p className="text-sm text-muted-foreground mt-2 text-center">
+              Search is disabled in demo mode due to network connectivity issues
+            </p>
+          )}
         </div>
 
         {/* Movies grid with responsive columns */}
@@ -181,6 +285,14 @@ const Index = () => {
               </div>
             ))}
         </div>
+
+        {!loading && movies.length === 0 && !networkError && (
+          <div className="text-center py-12">
+            <Wifi className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No movies found</h3>
+            <p className="text-muted-foreground">Try adjusting your search terms or check your network connection.</p>
+          </div>
+        )}
 
         {/* Load more button for pagination */}
         <div className="mt-12 flex justify-center">
