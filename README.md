@@ -38,8 +38,8 @@ A modern, responsive movie discovery application built with React, TypeScript, a
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next 14, TypeScript, Vite
-- **Routing**: App Router v6 with protected routes
+- **Frontend**: Next.js 14, TypeScript, Vite
+- **Routing**: App router v6 with protected routes
 - **Styling**: Tailwind CSS with custom design system
 - **UI Components**: Radix UI for accessible components
 - **State Management**: React Context + Custom Hooks
@@ -74,16 +74,22 @@ A modern, responsive movie discovery application built with React, TypeScript, a
    \`\`\`
 
 4. **Start development server**
-   bash
+   \`\`\`bash
    npm run dev
-  
+   \`\`\`
 
 5. **Open your browser**
    Navigate to `http://localhost:8080`
 
+### Demo Account
+
+For quick testing, use these demo credentials:
+- **Email**: `demo@example.com`
+- **Password**: `password`
+
 ## 📁 Project Structure
 
-
+\`\`\`
 src/
 ├── components/          # Reusable UI components
 │   ├── layout/         # Layout components (Header, etc.)
@@ -95,7 +101,7 @@ src/
 ├── routes/             # Route protection components
 ├── config/             # Configuration files
 └── lib/                # Utility functions
-
+\`\`\`
 
 ## 🔧 Available Scripts
 
